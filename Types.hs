@@ -7,7 +7,7 @@ module Types where
 
     startingBoard :: Board
     startingBoard = finalBoard
-        where finalBoard = insertAttackers $ insertCastles blankBoard
+        where finalBoard = insertDefenders $ insertAttackers $ insertCastles blankBoard
 
     insertCastles :: Board -> Board
     insertCastles b = M.insert (5, 5) (Nothing, Castle)
@@ -26,7 +26,19 @@ module Types where
     king = Just (Piece White True)
 
     insertAttackers :: Board -> Board
-    insertAttackers b = M.insert (5, 9) (attacker, Normal) -- right-side attackers
+    insertAttackers b =  M.insert (1, 5) (attacker, Normal) -- top-side attackers
+        $ M.insert (0, 7) (attacker, Normal)
+        $ M.insert (0, 6) (attacker, Normal)
+        $ M.insert (0, 5) (attacker, Normal)
+        $ M.insert (0, 4) (attacker, Normal)
+        $ M.insert (0, 3) (attacker, Normal)
+        $ M.insert (9, 5) (attacker, Normal) -- bottom-side attackers
+        $ M.insert (10, 7) (attacker, Normal)
+        $ M.insert (10, 6) (attacker, Normal)
+        $ M.insert (10, 5) (attacker, Normal)
+        $ M.insert (10, 4) (attacker, Normal)
+        $ M.insert (10, 3) (attacker, Normal)
+        $ M.insert (5, 9) (attacker, Normal) -- right-side attackers
         $ M.insert (7, 10) (attacker, Normal)
         $ M.insert (6, 10) (attacker, Normal)
         $ M.insert (5, 10) (attacker, Normal)
@@ -38,6 +50,20 @@ module Types where
         $ M.insert (5, 0) (attacker, Normal)
         $ M.insert (4, 0) (attacker, Normal)
         $ M.insert (3, 0) (attacker, Normal) b
+
+    insertDefenders :: Board -> Board
+    insertDefenders b = M.insert (6, 4) (defender, Normal)
+        $ M.insert (6, 6) (defender, Normal)
+        $ M.insert (4, 6) (defender, Normal)
+        $ M.insert (4, 4) (defender, Normal)
+        $ M.insert (5, 7) (defender, Normal)
+        $ M.insert (5, 6) (defender, Normal)
+        $ M.insert (4, 5) (defender, Normal)
+        $ M.insert (3, 5) (defender, Normal)
+        $ M.insert (5, 4) (defender, Normal)
+        $ M.insert (5, 3) (defender, Normal)
+        $ M.insert (7, 5) (defender, Normal)
+        $ M.insert (6, 5) (defender, Normal) b
 
     initGS :: ColorID -> ColorID -> ColorID -> GameState
     initGS wc bc dc = GameState (5, 5) White wc bc dc startingBoard
