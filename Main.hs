@@ -1,0 +1,45 @@
+module Main where
+    import UI.NCurses
+    import qualified Data.Map as M
+    import Types
+    import Control.Monad.IO.Class
+
+    main :: IO ()
+    main = runCurses $ do
+        setEcho False
+        setCursorMode CursorInvisible
+        wc <- newColorID ColorWhite ColorBlue 1
+        bc <- newColorID ColorBlack ColorBlue 2
+        dc <- newColorID ColorBlue ColorBlue  3
+        w <- defaultWindow
+        waitFor w (initGS wc bc dc)
+
+    waitFor :: Window -> GameState -> Curses ()
+    waitFor w = loop where
+        loop gs' = do
+            updateWindow w (clear
+                                >> mapM (drawBoard gs') (M.toList (board gs'))
+                                >> uncurry moveCursor (cursor_pos gs')
+                                >> drawString "X"
+                                >> moveCursor 10 20
+                                >> drawString (show (cursor_pos gs')))
+            render
+            ev <- getEvent w Nothing
+            case ev of
+                Nothing -> loop gs'
+                Just ev' -> case ev' of
+                                (EventCharacter 'w') -> loop (moveGameCursor gs' (-1, 0))
+                                (EventCharacter 's') -> loop (moveGameCursor gs' (1, 0))
+                                (EventCharacter 'a') -> loop (moveGameCursor gs' (0, -1))
+                                (EventCharacter 'd') -> loop (moveGameCursor gs' (0, 1))
+                                (EventCharacter 'p') -> loop gs'
+                                (EventCharacter 'q') -> return ()
+                                _ -> loop gs'
+
+    drawBoard :: GameState -> (Position, (Maybe Piece, PosType)) -> Update ()
+    drawBoard gs' ((y, x), (Nothing, Normal)) = moveCursor y x >> setColor (defColorID gs') >> drawString "."
+    drawBoard gs' ((y, x), (Nothing, Castle)) = moveCursor y x >> setColor (whiteColorID gs') >> drawString "C"
+    drawBoard gs' ((y, x), (Just (Piece c k), _)) = moveCursor y x >> if k then setColor wc >> drawString "K" else (if c == Black then setColor bc else setColor wc) >> drawString "o"
+        where
+            wc = whiteColorID gs'
+            bc = blackColorID gs'
