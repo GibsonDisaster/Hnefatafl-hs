@@ -7,11 +7,10 @@ module Types where
 
     startingBoard :: Board
     startingBoard = finalBoard
-        where finalBoard = insertDefenders $ insertAttackers $ insertCastles blankBoard
+        where finalBoard = M.insert (5, 5) (king, Castle) $ insertDefenders $ insertAttackers $ insertCastles blankBoard
 
     insertCastles :: Board -> Board
-    insertCastles b = M.insert (5, 5) (Nothing, Castle)
-        $ M.insert (10, 10) (Nothing, Castle)
+    insertCastles b = M.insert (10, 10) (Nothing, Castle)
         $ M.insert (10, 0) (Nothing, Castle)
         $ M.insert (0, 10) (Nothing, Castle)
         $ M.insert (0, 0) (Nothing, Castle) b
@@ -73,6 +72,18 @@ module Types where
         where
             newPos = (x1 + x2, y1 + y2)
             onScreen = \(x, y) -> (x >= 0 && x <= 10) && (y >= 0 && y <= 10)
+
+    changeSelectedPiece :: GameState -> GameState
+    changeSelectedPiece (GameState pos c wc bc dc b selPiece) = GameState pos c wc bc dc b pieceOnSelectedSquare
+        where
+            pieceOnSelectedSquare = case M.lookup pos b of
+                                        Just (piece, pos) -> piece
+                                        Nothing -> selPiece
+
+    getPieceAtPos :: Board -> Position -> Maybe Piece
+    getPieceAtPos b pos = case M.lookup pos b of
+                            Just (piece, pos) -> piece
+                            Nothing -> Nothing
 
     {- Start of Type Definitions -}
 
