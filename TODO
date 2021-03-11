@@ -1,4 +1,2 @@
-Finish adding the pieces to the starter board
 Create system for loading board from text file
-Create system for saving board to text file
-Look into ways to change the font
+Create system for determining legal moves (done but broken, only works horizontally)
