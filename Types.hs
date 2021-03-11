@@ -66,10 +66,10 @@ module Types where
         $ M.insert (6, 5) (defender, Normal) b
 
     initGS :: ColorID -> ColorID -> ColorID -> GameState
-    initGS wc bc dc = GameState (5, 5) White wc bc dc startingBoard
+    initGS wc bc dc = GameState (5, 5) WhiteTurn wc bc dc startingBoard Nothing
 
     moveGameCursor :: GameState -> (Integer, Integer) -> GameState
-    moveGameCursor old@(GameState (x1, y1) c wc bc dc b) (x2, y2) = if onScreen newPos then GameState newPos c wc bc dc b else old
+    moveGameCursor old@(GameState (x1, y1) c wc bc dc b selPiece) (x2, y2) = if onScreen newPos then GameState newPos c wc bc dc b selPiece else old
         where
             newPos = (x1 + x2, y1 + y2)
             onScreen = \(x, y) -> (x >= 0 && x <= 10) && (y >= 0 && y <= 10)
@@ -87,11 +87,19 @@ module Types where
 
     type Board = M.Map Position (Maybe Piece, PosType)
 
+    data GamePhase = StartMenu
+                   | WhiteTurn
+                   | BlackTurn
+                   | Paused
+                   | Victory PieceColor
+                   deriving (Show, Eq, Ord)
+
     data GameState = GameState {
-        cursor_pos :: (Integer, Integer),
-        current_turn :: PieceColor,
+        cursorPos :: (Integer, Integer),
+        gamePhase :: GamePhase,
         whiteColorID :: ColorID,
         blackColorID :: ColorID,
         defColorID :: ColorID,
-        board :: Board
+        board :: Board,
+        selectedPiece :: Maybe Piece
     } deriving (Show, Eq)

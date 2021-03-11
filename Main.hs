@@ -10,19 +10,22 @@ module Main where
         setCursorMode CursorInvisible
         wc <- newColorID ColorWhite ColorBlue 1
         bc <- newColorID ColorBlack ColorBlue 2
-        dc <- newColorID ColorBlue ColorBlue  3
+        dc <- newColorID ColorBlue ColorBlue 3
         w <- defaultWindow
         waitFor w (initGS wc bc dc)
 
     waitFor :: Window -> GameState -> Curses ()
     waitFor w = loop where
         loop gs' = do
+            let current_tile = M.lookup (cursorPos gs') (board gs')
             updateWindow w (clear
                                 >> mapM (drawBoard gs') (M.toList (board gs'))
-                                >> uncurry moveCursor (cursor_pos gs')
+                                >> uncurry moveCursor (cursorPos gs')
                                 >> drawString "X"
                                 >> moveCursor 10 20
-                                >> drawString (show (cursor_pos gs')))
+                                >> drawString (show (cursorPos gs'))
+                                >> moveCursor 9 20
+                                >> drawString (show current_tile))
             render
             ev <- getEvent w Nothing
             case ev of
@@ -43,3 +46,26 @@ module Main where
         where
             wc = whiteColorID gs'
             bc = blackColorID gs'
+
+    saveBoard :: Board -> String -> IO()
+    saveBoard b n = do
+        let boardStr = concatMap createBoardStr (M.toList b)
+        writeFile n boardStr
+
+    createBoardStr :: (Position, (Maybe Piece , PosType)) -> String
+    createBoardStr (_, (Nothing, Normal)) = "."
+    createBoardStr (_, (Nothing, Castle)) = "C"
+    createBoardStr (_, (Just (Piece c k), _))
+      | c == Black = "b"
+      | k = "K"
+      | otherwise = "w"
+
+    loadBoard :: String -> IO Board
+    loadBoard fileName = do
+        let b = blankBoard
+        fileContents <- readFile fileName
+        let pieces = getPieces fileContents
+        return b
+
+    getPieces :: String -> [(Position, Maybe Piece)]
+    getPieces boardStr = undefined
